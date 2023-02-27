@@ -6,12 +6,11 @@ end
 
 vim.g.theme_switcher_loaded = true
 
-require("base46").load_highlight "telescope"
-
 local options = {
   defaults = {
     vimgrep_arguments = {
       "rg",
+      "-L",
       "--color=never",
       "--no-heading",
       "--with-filename",
@@ -62,7 +61,6 @@ local options = {
 }
 
 -- check for any override
-options = require("core.utils").load_override(options, "nvim-telescope/telescope.nvim")
 telescope.setup(options)
 
 -- load extensions
