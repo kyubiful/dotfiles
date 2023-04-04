@@ -11,6 +11,8 @@ class Onedark:
     color2 = "#E06C75"
     color3 = "#61AFEF"
     color4 = "#98C379"
+    color5 = "#E5C07B"
+    color6 = "#56B6C2"
 
 onedark_theme = Onedark()
 

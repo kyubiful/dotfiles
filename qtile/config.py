@@ -176,49 +176,8 @@ screens = [
                 ),
                 widget.CurrentLayout(),
                 widget.CPU(
-                    foreground=onedark_theme.color3,
-                    format="CPU: {freq_current}GHz {load_percent}%",
-                    decorations=[
-                        BorderDecoration(
-                            colour = onedark_theme.color3,
-                            border_width = [0, 0, 2, 0],
-                            padding_x = 5,
-                            padding_y = None,
-                        )
-                    ]
-                ),
-                widget.Memory(
-                    foreground=onedark_theme.color4,
-                    fmt="Mem:{}",
-                    measure_mem="G",
-                    decorations=[
-                        BorderDecoration(
-                            colour = onedark_theme.color4,
-                            border_width = [0, 0, 2, 0],
-                            padding_x = 5,
-                            padding_y = None,
-                        )
-                    ]
-                ),
-                widget.CheckUpdates(
-                    distro="Arch",
-                    no_update_string="0",
-                    colour_have_updates=onedark_theme.color1,
-                    colour_no_updates=onedark_theme.color1,
-                    fmt="Upd: {}",
-                    decorations=[
-                        BorderDecoration(
-                            colour = onedark_theme.color1,
-                            border_width = [0, 0, 2, 0],
-                            padding_x = 5,
-                            padding_y = None,
-                        )
-                    ]
-                ),
-                widget.Battery(
-                    format="Bat: {percent:1.0%}",
                     foreground=onedark_theme.color2,
-                    low_foreground=onedark_theme.color2,
+                    format="CPU: {freq_current}GHz {load_percent}%",
                     decorations=[
                         BorderDecoration(
                             colour = onedark_theme.color2,
@@ -228,13 +187,54 @@ screens = [
                         )
                     ]
                 ),
-                widget.Backlight(
-                    backlight_name="intel_backlight",
-                    format="Bri: {percent:1.0%}",
+                widget.Memory(
                     foreground=onedark_theme.color3,
+                    fmt="Mem:{}",
+                    measure_mem="G",
                     decorations=[
                         BorderDecoration(
                             colour = onedark_theme.color3,
+                            border_width = [0, 0, 2, 0],
+                            padding_x = 5,
+                            padding_y = None,
+                        )
+                    ]
+                ),
+                widget.CheckUpdates(
+                    distro="Arch",
+                    no_update_string="0",
+                    colour_have_updates=onedark_theme.color4,
+                    colour_no_updates=onedark_theme.color4,
+                    fmt="Upd: {}",
+                    decorations=[
+                        BorderDecoration(
+                            colour = onedark_theme.color4,
+                            border_width = [0, 0, 2, 0],
+                            padding_x = 5,
+                            padding_y = None,
+                        )
+                    ]
+                ),
+                widget.Battery(
+                    format="Bat: {percent:1.0%}",
+                    foreground=onedark_theme.color5,
+                    low_foreground=onedark_theme.color5,
+                    decorations=[
+                        BorderDecoration(
+                            colour = onedark_theme.color5,
+                            border_width = [0, 0, 2, 0],
+                            padding_x = 5,
+                            padding_y = None,
+                        )
+                    ]
+                ),
+                widget.Backlight(
+                    backlight_name="intel_backlight",
+                    format="Bri: {percent:1.0%}",
+                    foreground=onedark_theme.color6,
+                    decorations=[
+                        BorderDecoration(
+                            colour = onedark_theme.color6,
                             border_width = [0, 0, 2, 0],
                             padding_x = 5,
                             padding_y = None,
@@ -245,10 +245,10 @@ screens = [
                 ),
                 widget.Volume(
                     fmt="Vol: {}",
-                    foreground=onedark_theme.color4,
+                    foreground=onedark_theme.color1,
                     decorations=[
                         BorderDecoration(
-                            colour = onedark_theme.color4,
+                            colour = onedark_theme.color1,
                             border_width = [0, 0, 2, 0],
                             padding_x = 5,
                             padding_y = None,
@@ -257,10 +257,10 @@ screens = [
                 ),
                 widget.Clock(
                     format="Dat: %Y-%m-%d %H:%M",
-                    foreground=onedark_theme.color1,
+                    foreground=onedark_theme.color2,
                     decorations=[
                         BorderDecoration(
-                            colour = onedark_theme.color1,
+                            colour = onedark_theme.color2,
                             border_width = [0, 0, 2, 0],
                             padding_x = 5,
                             padding_y = None,
