@@ -87,6 +87,7 @@ keys = [
     Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
     Key([mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
     Key([mod], "b", lazy.spawn("google-chrome-stable"), desc="Spawn chrome"),
+    Key([mod], "l", lazy.spawn("betterlockscreen -l blur"), desc="Spawn lockscreen"),
 ]
 
 groups = [Group(i) for i in [
@@ -200,12 +201,10 @@ screens = [
                         )
                     ]
                 ),
-                widget.CheckUpdates(
-                    distro="Arch",
-                    no_update_string="0",
-                    colour_have_updates=onedark_theme.color4,
-                    colour_no_updates=onedark_theme.color4,
-                    fmt="Upd: {}",
+                widget.Net(
+                    interface="wlo1", 
+                    foreground=onedark_theme.color4,
+                    format="Net: {down} ↓↑{up}",
                     decorations=[
                         BorderDecoration(
                             colour = onedark_theme.color4,
@@ -215,10 +214,13 @@ screens = [
                         )
                     ]
                 ),
-                widget.Battery(
-                    format="Bat: {percent:1.0%}",
-                    foreground=onedark_theme.color5,
-                    low_foreground=onedark_theme.color5,
+                widget.CheckUpdates(
+                    distro="Arch",
+                    no_update_string="0",
+                    colour_have_updates=onedark_theme.color5,
+                    colour_no_updates=onedark_theme.color5,
+                    fmt="Upd: {}",
+                    update_interval=60,
                     decorations=[
                         BorderDecoration(
                             colour = onedark_theme.color5,
@@ -228,13 +230,26 @@ screens = [
                         )
                     ]
                 ),
-                widget.Backlight(
-                    backlight_name="intel_backlight",
-                    format="Bri: {percent:1.0%}",
+                widget.Battery(
+                    format="Bat: {percent:1.0%}",
                     foreground=onedark_theme.color6,
+                    low_foreground=onedark_theme.color6,
                     decorations=[
                         BorderDecoration(
                             colour = onedark_theme.color6,
+                            border_width = [0, 0, 2, 0],
+                            padding_x = 5,
+                            padding_y = None,
+                        )
+                    ]
+                ),
+                widget.Backlight(
+                    backlight_name="intel_backlight",
+                    format="Bri: {percent:1.0%}",
+                    foreground=onedark_theme.color1,
+                    decorations=[
+                        BorderDecoration(
+                            colour = onedark_theme.color1,
                             border_width = [0, 0, 2, 0],
                             padding_x = 5,
                             padding_y = None,
@@ -245,10 +260,10 @@ screens = [
                 ),
                 widget.Volume(
                     fmt="Vol: {}",
-                    foreground=onedark_theme.color1,
+                    foreground=onedark_theme.color2,
                     decorations=[
                         BorderDecoration(
-                            colour = onedark_theme.color1,
+                            colour = onedark_theme.color2,
                             border_width = [0, 0, 2, 0],
                             padding_x = 5,
                             padding_y = None,
@@ -257,10 +272,10 @@ screens = [
                 ),
                 widget.Clock(
                     format="Dat: %Y-%m-%d %H:%M",
-                    foreground=onedark_theme.color2,
+                    foreground=onedark_theme.color3,
                     decorations=[
                         BorderDecoration(
-                            colour = onedark_theme.color2,
+                            colour = onedark_theme.color3,
                             border_width = [0, 0, 2, 0],
                             padding_x = 5,
                             padding_y = None,

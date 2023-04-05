@@ -1,5 +1,5 @@
 require 'nvim-treesitter.configs'.setup {
-  ensure_installed = { "astro", "bash", "c_sharp", "css", "graphql", "help", "html", "javascript", "json", "lua", "markdown", "typescript", "vim", "yaml" },
+  ensure_installed = { "astro", "bash", "c_sharp", "css", "graphql", "html", "javascript", "json", "lua", "markdown", "typescript", "vim", "yaml" },
 
   sync_install = false,
 
