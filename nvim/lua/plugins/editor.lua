@@ -70,7 +70,7 @@ return {
           desc = "Lists files in your current working directory, respects .gitignore",
         },
         {
-          ";r",
+          "<leader>sw",
           function()
             local builtin = require("telescope.builtin")
             builtin.live_grep({
@@ -104,7 +104,7 @@ return {
           desc = "Resume the previous telescope picker",
         },
         {
-          ";e",
+          "<leader>se",
           function()
             local builtin = require("telescope.builtin")
             builtin.diagnostics()
@@ -120,7 +120,7 @@ return {
           desc = "List Function names, variables, from Treesitter",
         },
         {
-          "sf",
+          "<leader>sf",
           function()
             local telescope = require("telescope")
             local function telescope_buffer_dir()
