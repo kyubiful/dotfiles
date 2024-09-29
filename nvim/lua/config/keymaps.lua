@@ -29,3 +29,7 @@ keymap.set("n", "<C-w><down>", "<C-w>-")
 -- Copilot
 
 keymap.set("n", "<leader>cp", ":CopilotChatToggle<Return>", opts)
+
+-- Toggle term
+
+keymap.set("n", "<leader>tt", ":ToggleTerm<Return>", opts)
