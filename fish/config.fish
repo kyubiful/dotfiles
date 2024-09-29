@@ -15,6 +15,7 @@ alias la "ls -A"
 alias ll "ls -l"
 alias lla "ll -A"
 alias g git
+alias ls "eza --icons"
 alias ide "sh ~/.scripts/ide"
 command -qv nvim && alias vim nvim
 
@@ -46,8 +47,9 @@ if test -f $LOCAL_CONFIG
 end
 
 # pnpm
-set -gx PNPM_HOME "/Users/kyubiful/Library/pnpm"
+set -gx PNPM_HOME /Users/kyubiful/Library/pnpm
 if not string match -q -- $PNPM_HOME $PATH
-  set -gx PATH "$PNPM_HOME" $PATH
+    set -gx PATH "$PNPM_HOME" $PATH
 end
 # pnpm end
+status --is-interactive; and . (rbenv init -|psub)
