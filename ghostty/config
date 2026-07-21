@@ -32,3 +32,6 @@ keybind = ctrl+t>shift+h=resize_split:left,30
 keybind = ctrl+t>shift+j=resize_split:down,30
 keybind = ctrl+t>shift+k=resize_split:up,30
 keybind = ctrl+t>shift+l=resize_split:right,30
+
+# tabs config
+macos-titlebar-style = "tabs"
