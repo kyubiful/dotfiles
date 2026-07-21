@@ -1,0 +1,32 @@
+# theme = solarized-osaka-night
+theme = solarized_osaka_dark
+# theme = Catppuccin Mocha
+
+font-family = "JetBrainsMono Nerd Font Mono"
+# font-family = "Mononoki Nerd Font"
+font-size = 14
+
+background-opacity = 0.9
+background-blur-radius = 15
+
+window-padding-x = 5
+window-padding-y = 10
+split-divider-color = #ffffff
+keybind = shift+enter=text:\x1b\r
+
+# tmux-style leader key (ctrl+t)
+keybind = ctrl+t>v=new_split:right
+keybind = ctrl+t>s=new_split:down
+keybind = ctrl+t>h=goto_split:left
+keybind = ctrl+t>j=goto_split:down
+keybind = ctrl+t>k=goto_split:up
+keybind = ctrl+t>l=goto_split:right
+keybind = ctrl+t>c=new_tab
+keybind = ctrl+t>n=next_tab
+keybind = ctrl+t>x=close_tab:this
+keybind = ctrl+t>r=prompt_tab_title
+keybind = ctrl+g>r=reload_config
+keybind = ctrl+t>shift+h=resize_split:left,30
+keybind = ctrl+t>shift+j=resize_split:down,30
+keybind = ctrl+t>shift+k=resize_split:up,30
+keybind = ctrl+t>shift+l=resize_split:right,30
