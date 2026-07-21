@@ -29,6 +29,9 @@ set -gx PATH ~/.local/bin $PATH
 # NodeJS
 set -gx PATH node_modules/.bin $PATH
 
+# fnm (Node version manager)
+command -qv fnm && fnm env --use-on-cd --shell fish | source
+
 # Go
 set -g GOPATH $HOME/go
 set -gx PATH $GOPATH/bin $PATH
