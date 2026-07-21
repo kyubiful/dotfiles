@@ -1,5 +1,7 @@
 # theme = solarized-osaka-night
 theme = solarized_osaka_dark
+
+command = /opt/homebrew/bin/fish
 # theme = Catppuccin Mocha
 
 font-family = "JetBrainsMono Nerd Font Mono"
