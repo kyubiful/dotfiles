@@ -25,6 +25,7 @@ set -gx EDITOR nvim
 set -gx PATH bin $PATH
 set -gx PATH ~/bin $PATH
 set -gx PATH ~/.local/bin $PATH
+fish_add_path ~/.scripts
 
 # NodeJS
 set -gx PATH node_modules/.bin $PATH
