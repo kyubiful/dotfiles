@@ -1,5 +1,8 @@
 if test -x /opt/homebrew/bin/brew
     eval (/opt/homebrew/bin/brew shellenv)
+    # Persist as a universal path so conf.d/*.fish (sourced before
+    # config.fish) can find Homebrew binaries like fnm from the first tab.
+    fish_add_path -U /opt/homebrew/bin /opt/homebrew/sbin
 end
 
 if type -q eza
