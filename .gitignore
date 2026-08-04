@@ -15,3 +15,9 @@ starship
 tmux
 zed
 git
+pi/agent/auth.json
+pi/agent/sessions/
+pi/agent/intercom/
+pi/agent/npm/
+pi/agent/models-store.json
+pi/**/evals/
