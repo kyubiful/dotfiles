@@ -60,7 +60,7 @@ export default function (pi: ExtensionAPI) {
 		for (const entry of ctx.sessionManager.getEntries()) {
 			if (entry.type === "custom" && entry.customType === "persona-active") {
 				const data = entry.data as
-					| { name?: string; color?: string }
+					| { id?: string; name?: string; color?: string }
 					| undefined;
 				personaName = data?.name;
 				personaColor = data?.color;
@@ -70,7 +70,11 @@ export default function (pi: ExtensionAPI) {
 		ctx.ui.setFooter((tui, theme, footerData) => {
 			const unsubscribe = footerData.onBranchChange(() => tui.requestRender());
 			const unsubscribePersona = pi.events.on("persona:changed", (data) => {
-				const payload = data as { name?: string; color?: string };
+				const payload = data as {
+					id?: string;
+					name?: string;
+					color?: string;
+				};
 				personaName = payload.name;
 				personaColor = payload.color;
 				tui.requestRender();
