@@ -11,5 +11,6 @@
     "npm:@tintinweb/pi-subagents",
     "npm:pi-claude-style-scroll"
   ],
-  "defaultThinkingLevel": "high"
+  "defaultThinkingLevel": "high",
+  "hideThinkingBlock": true
 }
