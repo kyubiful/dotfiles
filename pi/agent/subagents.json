@@ -1,4 +1,5 @@
 {
+  "disableDefaultAgents": true,
   "model_profiles": {
     "view-test": {
       "model": "openai-codex/gpt-5.6-luna"
