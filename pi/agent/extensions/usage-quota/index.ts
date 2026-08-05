@@ -17,7 +17,7 @@
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Box, Text } from "@earendil-works/pi-tui";
-import { spawn } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
 import {
   closeSync,
   existsSync,
@@ -371,26 +371,71 @@ function stripJsonComments(input: string): string {
   return out;
 }
 
-function readCopilotCliToken(): string | null {
-  const path = join(homedir(), ".copilot", "config.json");
-  if (!existsSync(path)) return null;
+/**
+ * macOS: the Copilot CLI stores its OAuth token in the Keychain
+ * (service "copilot-cli", account "<host>:<login>"), not in config.json.
+ * Reads the account to look up from config.json's `lastLoggedInUser`.
+ */
+function readCopilotCliTokenFromKeychain(
+  lastUser?: { host?: string; login?: string },
+): string | null {
+  if (!lastUser?.host || !lastUser?.login) return null;
+  const account = `${lastUser.host}:${lastUser.login}`;
   try {
-    const json = JSON.parse(stripJsonComments(readFileSync(path, "utf8")));
-    const tokens = json.copilotTokens as Record<string, string> | undefined;
-    if (!tokens) return null;
-    const lastUser = json.lastLoggedInUser as
-      { host?: string; login?: string } | undefined;
-    if (lastUser?.host && lastUser?.login) {
-      const key = `${lastUser.host}:${lastUser.login}`;
-      if (tokens[key]) return tokens[key];
-    }
-    const entry = Object.entries(tokens).find(([k]) =>
-      k.startsWith("https://github.com"),
-    );
-    return entry?.[1] ?? null;
+    const out = execFileSync(
+      "security",
+      ["find-generic-password", "-s", "copilot-cli", "-a", account, "-w"],
+      { encoding: "utf8", timeout: 5000, stdio: ["ignore", "pipe", "ignore"] },
+    ).trim();
+    return out.length > 0 ? out : null;
   } catch {
     return null;
   }
+}
+
+/**
+ * Linux: the Copilot CLI stores its OAuth token inside
+ * `~/.copilot/config.json` under `copilotTokens`, keyed by "<host>:<login>".
+ */
+function readCopilotCliTokenFromConfigFile(
+  json: any,
+  lastUser?: { host?: string; login?: string },
+): string | null {
+  const tokens = json.copilotTokens as Record<string, string> | undefined;
+  if (!tokens) return null;
+  if (lastUser?.host && lastUser?.login) {
+    const key = `${lastUser.host}:${lastUser.login}`;
+    if (tokens[key]) return tokens[key];
+  }
+  const entry = Object.entries(tokens).find(([k]) =>
+    k.startsWith("https://github.com"),
+  );
+  return entry?.[1] ?? null;
+}
+
+function readCopilotCliToken(): string | null {
+  const path = join(homedir(), ".copilot", "config.json");
+  if (!existsSync(path)) return null;
+  let json: any;
+  try {
+    json = JSON.parse(stripJsonComments(readFileSync(path, "utf8")));
+  } catch {
+    return null;
+  }
+
+  const lastUser = json.lastLoggedInUser as
+    { host?: string; login?: string } | undefined;
+
+  // Token storage differs by OS: macOS Copilot CLI writes to the Keychain,
+  // Linux writes to config.json. Try the OS-appropriate source first, then
+  // fall back to the other in case a given CLI version behaves differently.
+  if (process.platform === "darwin") {
+    return (
+      readCopilotCliTokenFromKeychain(lastUser) ??
+      readCopilotCliTokenFromConfigFile(json, lastUser)
+    );
+  }
+  return readCopilotCliTokenFromConfigFile(json, lastUser);
 }
 
 async function getGhToken(pi: ExtensionAPI): Promise<string | null> {

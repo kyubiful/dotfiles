@@ -23,8 +23,17 @@ Comando `/usage` que muestra la cuota restante de las suscripciones de Codex
 ### Copilot
 
 1. Obtiene un token en este orden: `gh auth token` (GitHub CLI) → si falla,
-   lee el token guardado por la Copilot CLI en `~/.copilot/config.json`
-   (con un mini parser que soporta comentarios `//` y `/* */` en el JSON).
+   busca el token guardado por la Copilot CLI de forma **específica según el
+   sistema operativo**, ya que cada versión/plataforma de la CLI lo guarda en
+   un sitio distinto:
+   - **macOS**: Keychain (`security find-generic-password -s copilot-cli -a
+     "<host>:<login>"`), leyendo antes `<host>`/`<login>` desde
+     `lastLoggedInUser` en `~/.copilot/config.json`. Si el Keychain no tiene
+     el dato, cae al método de archivo (por si una versión futura de la CLI
+     vuelve a escribirlo ahí).
+   - **Linux (y cualquier otro SO)**: `~/.copilot/config.json`, campo
+     `copilotTokens` (con un mini parser que soporta comentarios `//` y
+     `/* */` en el JSON).
 2. Llama al endpoint interno/no documentado
    `GET https://api.github.com/copilot_internal/user` (el mismo que usan los
    clientes oficiales) con headers `Copilot-Integration-Id` y
@@ -53,8 +62,8 @@ Comando `/usage` que muestra la cuota restante de las suscripciones de Codex
 - Acceso a red.
 - Codex: CLI `codex` instalada y logueada con ChatGPT (para el modo "live");
   si no, basta con haber usado Codex localmente para tener logs de sesión.
-- Copilot: `gh` CLI autenticada, o la Copilot CLI logueada
-  (`~/.copilot/config.json`).
+- Copilot: `gh` CLI autenticada, o la Copilot CLI logueada (token leído del
+  Keychain en macOS, o de `~/.copilot/config.json` en Linux).
 - Si ninguna de las dos integraciones está disponible, el comando igual
   corre y muestra mensajes de "no data" explicando qué falta configurar.
 
