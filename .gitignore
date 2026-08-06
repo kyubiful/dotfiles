@@ -1,5 +1,6 @@
 fish/fish_variables
 github-copilot/
+fish/config-local.fish
 gcloud/
 filezilla/
 raycast/extensions/
