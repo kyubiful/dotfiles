@@ -91,6 +91,22 @@
  * (flechas, Tab, Enter, Escape) lo sigue haciendo el `Editor` base de
  * siempre.
  *
+ * Salvaguarda de foco (importante): `render()` solo llama a
+ * `overlay.update()` (que puede recrear el overlay y volver a apilarlo en
+ * el `overlayStack` compartido de pi) mientras `this.focused` es `true`.
+ * `isShowingAutocomplete()` del `Editor` base NO depende del foco — si este
+ * editor pierde el foco (p.ej. se abre la vista de un subagente, un
+ * `ctx.ui.select`, o cualquier overlay de otra extensión) con el
+ * autocompletado todavía "abierto" y sin este guard, el próximo render
+ * recalcularía `aboveRows` (el marcador de cursor deja de emitirse sin
+ * foco) y recrearía el popup por encima de esa otra vista — el Escape de
+ * esa vista terminaría cerrando (`hideOverlay()` saca el último elemento
+ * del stack) este popup en vez de la vista real, dejándola pegada en
+ * pantalla para siempre (bug reproducido y corregido: ver historial de
+ * cambios). Sin foco, el overlay solo se oculta (`setHidden`, sin sacarlo
+ * del stack) y el estado de "recién abierto" se resetea para volver a
+ * pedir la fila de cursor al reenfocar.
+ *
  * Validado con una pty real (Python + `pyte` simulando la terminal,
  * incluyendo respuestas DSR) en terminales de 15 y 30 filas: sin
  * superposición con el input en ningún caso, y sin saltos del contenido de
@@ -420,35 +436,63 @@ class EnhancedEditor extends CustomEditor {
 				lines.length -= listLines.length;
 			}
 
-			// Recién se abre el autocompletado: pedile a la terminal la fila
-			// REAL del cursor (válida tanto en sesiones cortas como largas, a
-			// diferencia de cualquier cálculo basado en "el editor+footer están
-			// pegados al fondo"). Mientras no haya respuesta, se usa el
-			// fallback de abajo para esta apertura puntual.
-			if (!this.wasShowingAutocomplete) {
-				this.wasShowingAutocomplete = true;
+			if (!this.focused) {
+				// El editor perdió el foco (p.ej. se abrió la vista de un
+				// subagente, un ctx.ui.select, o cualquier otro overlay con
+				// foco propio) mientras el autocompletado seguía "abierto":
+				// `isShowingAutocomplete()` no depende del foco en el Editor
+				// base, así que nadie lo cerró. En ese estado el popup no es
+				// visible/relevante para el usuario — está detrás de quien
+				// tenga el foco ahora. Congelamos toda mutación del overlay:
+				// llamar a `update()`/`create()` acá haría un `push` nuevo al
+				// TOPE del overlayStack compartido, por encima de la vista que
+				// sí tiene foco, y el próximo Escape sobre esa vista cerraría
+				// (`hideOverlay()` hace `pop()` del último elemento) este popup
+				// recién apilado en vez de la vista real — dejándola huérfana
+				// en pantalla, con foco, pero con el `closed` interno de
+				// `showExtensionCustom` ya consumido (Escape deja de tener
+				// efecto para siempre en esa vista).
+				//
+				// Solo ocultamos (sin sacar la entrada del stack, para no
+				// reintroducir el salto de layout que este diseño ya evita) y
+				// reseteamos el estado de "recién abierto": si el usuario
+				// vuelve a enfocar el editor con el autocompletado todavía
+				// abierto, se dispara un CursorRowProbe.query() fresco en vez
+				// de reusar una fila de cursor potencialmente obsoleta.
+				this.wasShowingAutocomplete = false;
 				this.lastResolvedCursorRow = undefined;
-				void this.probe.query(this.tui.terminal).then((row) => {
-					this.lastResolvedCursorRow = row;
-					this.tui.requestRender();
-				});
-			}
-
-			let aboveRows: number;
-			if (this.lastResolvedCursorRow !== undefined && cursorLineIndex !== -1) {
-				// Fila real (viewport-relativa) del borde superior del bloque =
-				// fila real del cursor menos las filas del bloque que están por
-				// encima suyo (border superior + líneas envueltas previas).
-				const topBorderRow = this.lastResolvedCursorRow - cursorLineIndex;
-				aboveRows = this.tui.terminal.rows - topBorderRow;
+				this.overlay.hide();
 			} else {
-				// Fallback aproximado mientras no tenemos la fila real (primeros
-				// milisegundos tras abrir el autocompletado): asume que el
-				// bloque+footer están pegados al fondo de la terminal.
-				aboveRows = lines.length + ASSUMED_FOOTER_HEIGHT_ROWS;
-			}
+				// Recién se abre el autocompletado: pedile a la terminal la fila
+				// REAL del cursor (válida tanto en sesiones cortas como largas, a
+				// diferencia de cualquier cálculo basado en "el editor+footer están
+				// pegados al fondo"). Mientras no haya respuesta, se usa el
+				// fallback de abajo para esta apertura puntual.
+				if (!this.wasShowingAutocomplete) {
+					this.wasShowingAutocomplete = true;
+					this.lastResolvedCursorRow = undefined;
+					void this.probe.query(this.tui.terminal).then((row) => {
+						this.lastResolvedCursorRow = row;
+						this.tui.requestRender();
+					});
+				}
 
-			this.overlay.update(listLines, width, aboveRows);
+				let aboveRows: number;
+				if (this.lastResolvedCursorRow !== undefined && cursorLineIndex !== -1) {
+					// Fila real (viewport-relativa) del borde superior del bloque =
+					// fila real del cursor menos las filas del bloque que están por
+					// encima suyo (border superior + líneas envueltas previas).
+					const topBorderRow = this.lastResolvedCursorRow - cursorLineIndex;
+					aboveRows = this.tui.terminal.rows - topBorderRow;
+				} else {
+					// Fallback aproximado mientras no tenemos la fila real (primeros
+					// milisegundos tras abrir el autocompletado): asume que el
+					// bloque+footer están pegados al fondo de la terminal.
+					aboveRows = lines.length + ASSUMED_FOOTER_HEIGHT_ROWS;
+				}
+
+				this.overlay.update(listLines, width, aboveRows);
+			}
 		} else {
 			this.wasShowingAutocomplete = false;
 			this.lastResolvedCursorRow = undefined;
