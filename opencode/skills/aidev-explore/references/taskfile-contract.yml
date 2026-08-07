@@ -1,0 +1,263 @@
+document:
+  preferred_target_file: Taskfile.yml
+  alternate_target_files:
+    - Taskfile.yaml
+  purpose: Define the repository-root Taskfile used as the source of truth for local development commands when Taskfile guidance is applicable for the repository.
+
+taskfile:
+  version: "3"
+  top_level_tasks_key: tasks
+
+phases:
+  - name: install
+    required: false
+    purpose: Install dependencies, bootstrap the workspace, or prepare required local tooling and configuration.
+    allow_variants: true
+    variant_pattern: "<phase>-<qualifier>[-<folder>]"
+  - name: build
+    required: false
+    purpose: Build, compile, package, or generate repository artifacts.
+    allow_variants: true
+    variant_pattern: "<phase>-<qualifier>[-<folder>]"
+  - name: lint
+    required: false
+    purpose: Run linters, static analysis, or type validation.
+    allow_variants: true
+    variant_pattern: "<phase>-<qualifier>[-<folder>]"
+  - name: format
+    required: false
+    purpose: Run formatters or formatting checks.
+    allow_variants: true
+    variant_pattern: "<phase>-<qualifier>[-<folder>]"
+  - name: test
+    required: false
+    purpose: Run automated tests such as unit, integration, or end-to-end suites.
+    allow_variants: true
+    variant_pattern: "<phase>-<qualifier>[-<folder>]"
+  - name: start
+    required: false
+    purpose: Start the repository locally, including runtime dependencies when the repository evidence supports them.
+    allow_variants: true
+    variant_pattern: "<phase>-<qualifier>[-<folder>]"
+
+evidence_policy:
+  evidence_hierarchy: Resolve commands using this order -> repository evidence first, deterministic detection facts second, authoritative Inditex documentation/tool output third, explicit uncertainty last.
+  repository_evidence: Repository evidence includes package.json scripts, Maven or Gradle wrapper files, Maven plugins and modules, pyproject tool sections, Makefile targets, compose files, Cargo metadata, Go command packages, or explicit command lines in repository documentation.
+  deterministic_command_evidence: The detection JSON may include command_evidence extracted from local repository files. Treat it as the starting inventory for command resolution and inspect source files only when it is incomplete, stale, or ambiguous for an applicable phase.
+  corporate_documentation_evidence: When repository files identify an ecosystem-specific tool or convention but do not show the command, consult the Inditex's relevant available documentations or search tools before declaring the command unknown.
+  amiga_framework_tool_rule: For repositories detected as AMIGA Java, AMIGA Web, AMIGA Node, AMIGA Python, AMIGA Go, or AMIGA Rust, consult the relevant available Inditex ecosystem tool such as Geppetto or the framework-specific MCP before accepting or rejecting framework-derived command patterns unless the command is an explicit repository script or Makefile target.
+  local_dependency_services_rule: Docker Compose files are evidence for local dependency services such as Redis, MongoDB, PostgreSQL, Kafka, Schema Registry, or other Container Hub/development containers. Treat those services as support tasks, not as replacements for install/build/lint/format/test/start phase commands.
+  tool_versions_rule: Tool-version files identify required tool versions only. Resolve installation or execution commands through repository evidence, deterministic detection, or authoritative documentation/tool output; do not infer commands from file names or model memory. The mandatory `asdf install` install-task preflight is a Taskfile safety policy and does not infer any additional setup command from a version file.
+  uncertain_phase_rule: If no supported command can be identified for a phase, omit that task from the Taskfile instead of guessing or creating a failing placeholder.
+  unsupported_phase_semantics: Unsupported means absent from the Taskfile. Do not represent unsupported or non-applicable phases with commands that print an error and exit.
+  tool_usage_rule: Authoritative tools may confirm, refine, or reject repository-derived candidates, but must not be used to invent commands unrelated to repository evidence.
+  no_diagnostic_commands_as_tasks: Do not use diagnostic or discovery-only commands as phase implementations. Examples that must not be used as install/build/lint/format/test/start implementations include mvn help:active-profiles, npm --version, poetry --version, uv --version, go env, cargo metadata, or any command whose only purpose is to prove that a tool exists.
+  no_incorrect_success_policy: A Taskfile command that is plausible but not validated by this contract is worse than omitting the task. Prefer omission over a guessed runnable command.
+  repository_input_immutability: Repository-local source, build, dependency, lock, wrapper, and configuration files are immutable evidence. Never modify, delete, rename, or normalize them to make Taskfile generation easier or to move command behavior out of or into the Taskfile. Resolve Taskfile commands around their existing behavior.
+  workflow_coverage: Every phase and every variant established by supported repository-local or authoritative evidence must be represented in the Taskfile. Apply this requirement through the selected toolchain profile and capability overlays without inventing unsupported workflows or omitting evidenced alternatives.
+
+confidence_policy:
+  levels:
+    high: The candidate command is explicit in repository evidence or follows from a single strongly-supported interpretation with no meaningful ambiguity.
+    medium: A plausible candidate exists, but repository evidence is indirect, incomplete, or leaves limited ambiguity that may be reduced through authoritative tool consultation.
+    low: Repository evidence is weak, conflicting, or insufficient to justify a supported command without further confirmation.
+  escalation_rule:
+    high: No external consultation is required.
+    medium: Consult the relevant authoritative Inditex tech ecosystem tools before deciding whether the phase is supported or should be omitted.
+    low: External consultation is mandatory before omitting a phase that appears relevant but lacks clear repository evidence.
+
+command_resolution_model:
+  general_rules:
+    command_directory: Use the directory containing the detected build file as the base task dir unless repository evidence points to a more specific command directory.
+    directory_task_suffix: "When a task runs below the repository root, append the normalized basename of its `dir` as the final task-name suffix. For example, use `start-code` for `dir: code`, `start-docs` for `dir: docs`, and `test-integration-code` for an integration-test variant in `code`. Tasks with `dir: .` keep their base or variant name without a folder suffix."
+    wrapper_preference: Prefer repository-local wrappers when present in the command directory, such as ./mvnw, ./gradlew, or package manager lockfile conventions. Otherwise use the ecosystem command.
+    explicit_scripts_first: For package-script ecosystems, prefer explicit package.json scripts for build, lint, format, test, and start. Do not replace explicit scripts with raw tool invocations.
+    variant_rule: When both a canonical base command and useful repository-specific alternatives exist, keep the canonical command as the base phase and add alternatives as phase variants.
+    omission_rule: Omit a phase task when no supported command is identified from repository evidence, deterministic detection, or authoritative Inditex tool output.
+    install_preflight: Every install task, including install variants and folder-qualified install tasks, must use `asdf install` as the first entry in `cmds`, before the package-manager, build-tool, or bootstrap installation command. Do not attach `deps` to an install task because Taskfile executes them before `cmds`; call any subsequent setup from entries after `asdf install` instead.
+
+  selection_rule: Select one primary toolchain profile from deterministic detection and repository evidence, then apply capability overlays evidenced by repository files or authoritative Inditex tool output. AMIGA is an ecosystem signal used to confirm conventions and capabilities; it is not a parallel replacement for Maven, npm, Poetry, Go, Cargo, or Docker Compose rules.
+
+  toolchain_profiles:
+    maven:
+      applies_when:
+        build_system: Maven
+        evidence:
+          - pom.xml exists or detection identifies Maven.
+      command_prefix_rule: Use ./mvnw when mvnw exists in the Maven command directory; otherwise use mvn.
+      base_tasks:
+        install: Prefer <mvn> clean install when repository documentation, AMIGA documentation, or multi-module lifecycle evidence supports a full local install. Plain <mvn> install is acceptable when repository evidence uses it. Do not use diagnostic or dependency-resolution-only goals as install.
+        build: Prefer <mvn> package. Use <mvn> compile only when the repository is compile-only or package is not supported. Do not use install as the base build task unless repository evidence explicitly names install as the build command; prefer a build-install variant when useful.
+        lint: Use <mvn> validate only when validation, enforcer, checkstyle, PMD, SpotBugs, formatting-validation, or similar plugin evidence exists. Otherwise unsupported.
+        format: Use an evidenced formatter plugin goal only. For AMIGA Java Format evidence such as amiga-javaformat-maven-plugin, amiga-javaformat.version, or inditex.amiga-javaformat.version, use <mvn> amiga-javaformat:apply.
+        test: Prefer <mvn> verify when repository docs, AMIGA conventions, failsafe/integration-test configuration, or lifecycle evidence expects full verification. Use <mvn> test for standard unit-test-only Maven projects. Add variants such as test-unit or test-integration when both are evidenced.
+        start: Use <mvn> spring-boot:run only when Spring Boot runnable evidence exists. Run it from the boot-named module or runnable module directory when the root pom declares such a module. Otherwise use an explicit repository-documented run command or mark unsupported.
+
+    package_manager:
+      applies_when:
+        build_system_any:
+          - npm
+          - yarn
+          - pnpm
+        evidence:
+          - package.json exists.
+      package_manager_rule: Use npm when package-lock.json exists or no alternative lockfile exists, pnpm when pnpm-lock.yaml exists, and yarn when yarn.lock exists.
+      base_tasks:
+        install: Use the selected package manager install command. Add install-ci only when a lockfile and repository workflow justify a CI-style install command.
+        build: Use package.json script build when present; otherwise unsupported unless repository documentation identifies another build command.
+        lint: Use package.json script lint when present; otherwise unsupported unless repository documentation identifies another lint/typecheck command.
+        format: Use package.json script format, prettier, or equivalent formatter script when present; otherwise unsupported.
+        test: Use package.json script test when present; add variants for test:unit, test:e2e, test:watch, or equivalent scripts.
+        start: Prefer package.json script start when present. Otherwise use dev, start:dev, serve, or equivalent scripts only when explicitly present.
+
+    python:
+      applies_when:
+        build_system_any:
+          - poetry
+          - uv
+        evidence:
+          - pyproject.toml exists.
+      base_tasks:
+        install: Use poetry lock followed by poetry install for Poetry projects; use uv lock followed by uv sync for uv projects.
+        build: Use poetry build, uv build, or another explicit packaging command only when packaging/build evidence exists; otherwise unsupported.
+        lint: Use explicitly configured lint tools or task runner entries such as ruff, flake8, mypy, poe, taskipy, make, or tox; otherwise unsupported.
+        format: Use explicitly configured formatter tools such as ruff format, black, poe, taskipy, make, or tox; otherwise unsupported.
+        test: Use explicit pyproject scripts, make/tox/task runner entries, or pytest through the active toolchain when pytest evidence exists. Add test-integration variants when evidenced.
+        start: Use explicit application entry points, pyproject scripts such as app-start, make targets, or framework commands only when evidenced; otherwise unsupported.
+
+    go:
+      applies_when:
+        build_system: go
+        evidence:
+          - go.mod exists.
+      base_tasks:
+        install: Prefer Makefile bootstrap/verify target when documented or generated by the framework; otherwise use go mod download.
+        build: Prefer Makefile build target when present; otherwise use go build ./...
+        lint: Prefer Makefile lint target or golangci-lint config; otherwise unsupported.
+        format: Use Makefile format target when present; otherwise go fmt ./...
+        test: Prefer Makefile test target when present; otherwise go test ./...
+        start: Use Makefile run/start target or a clear main package command only; unsupported when no runnable target or main package is evidenced.
+
+    rust:
+      applies_when:
+        build_system: cargo
+        evidence:
+          - Cargo.toml exists.
+      base_tasks:
+        install: cargo fetch
+        build: cargo build
+        lint: cargo clippy --all-targets --all-features
+        format: cargo fmt
+        test: cargo test
+        start: cargo run only when Cargo metadata indicates a binary target or src/main.rs exists; otherwise unsupported. If repository evidence documents cargo run -r or bacon workflows, add them as variants rather than replacing the standard base task unless the repository explicitly prefers them.
+
+  capability_overlays:
+    amiga_ecosystem:
+      applies_when:
+        stack_prefix: AMIGA
+      purpose: Confirm framework-specific conventions through available Inditex tools such as Geppetto or framework MCPs, then apply the result to the active toolchain profile. Do not duplicate the toolchain profile or override explicit repository commands.
+      rules:
+        - If repository evidence already defines a command through package.json scripts, Makefile targets, pyproject scripts, or explicit docs, keep that command unless authoritative tool output proves it obsolete for this repository.
+        - If repository evidence identifies an AMIGA framework capability but not the concrete command, consult the relevant Inditex ecosystem tool before accepting a convention or declaring the phase unsupported.
+        - Record the command rationale in the sub-agent reasoning, but return only the Taskfile artifact.
+
+    spring_boot_runtime:
+      applies_when:
+        evidence:
+          - spring-boot-maven-plugin is declared.
+          - a boot-named module is declared in a parent pom.
+          - repository docs mention spring-boot:run.
+      rules:
+        - Use <mvn> spring-boot:run for start.
+        - If a parent pom declares a boot-named module, set start.dir to that module directory.
+        - Do not replace spring-boot:run with java -jar unless repository docs explicitly define the jar workflow as the local start command.
+
+    java_formatter:
+      applies_when:
+        evidence:
+          - formatter Maven plugin, formatter property, or explicit formatter command is present.
+      rules:
+        - For AMIGA Java Format evidence, use <mvn> amiga-javaformat:apply.
+        - For non-AMIGA formatter plugins, use only goals evidenced by pom.xml or repository docs.
+        - Leave format unsupported when no formatter evidence exists after required consultation.
+
+    package_scripts:
+      applies_when:
+        evidence:
+          - package.json scripts exist.
+      rules:
+        - Explicit package.json scripts win for build, lint, format, test, and start.
+        - Add variants for additional scripts whose names clearly map to phase variants.
+        - When a start script launches a Vite development/preview server or a Webpack development server, ensure the effective invocation exposes it on `0.0.0.0`.
+        - If the existing package script already passes `--host 0.0.0.0` to every development server it launches, invoke the script without forwarding that flag again.
+        - If the existing package script leaves a development server without the flag, forward `--host 0.0.0.0` using the selected package manager's supported syntax. Do not edit the package script.
+
+    frontend_dev_server:
+      applies_when:
+        evidence:
+          - A start task directly launches Vite, Vite preview, Webpack Dev Server, or `webpack serve`.
+          - A package.json script invoked by a start task launches one of those development servers.
+      rules:
+        - Every applicable start task must result in every development server receiving `--host 0.0.0.0`, either from the immutable underlying script or directly from the Taskfile command, but never redundantly from both.
+        - Do not add the host flag to non-server commands such as `vite build` or a plain Webpack production build.
+        - Preserve explicit package.json scripts and their existing arguments. Forward the host flag through the selected package manager only when the invoked script does not already provide it; never replace or edit the script to transfer flag ownership.
+
+    make_targets:
+      applies_when:
+        evidence:
+          - Makefile targets exist.
+      rules:
+        - Prefer explicit Makefile targets that match phases or documented workflows.
+        - For generated framework Makefiles, consult authoritative docs when target meaning is unclear, then keep the Makefile target rather than reimplementing it with raw tool commands.
+
+    local_dependency_services:
+      applies_when:
+        evidence:
+          - docker-compose.yml, docker-compose.yaml, compose.yml, or compose.yaml exists in the repository.
+          - Repository documentation or configuration explicitly names local service dependencies.
+          - Compose files reference Container Hub images such as inditex-docker.jfrog.io/devenv/*, or service names such as redis, mongodb, postgres, kafka, zookeeper, schema-registry, or trafficparrot.
+      tasks:
+        start-deps:
+          command: "docker compose -f <compose_file> up -d --wait"
+          fallback_command: "docker compose -f <compose_file> up -d"
+          purpose: Start local dependency containers needed by runtime or integration-test workflows.
+          directory_rule: Use the directory containing the compose file as dir and omit -f only when the command runs from that same directory against the default compose file name.
+        stop-deps:
+          command: "docker compose -f <compose_file> down"
+          purpose: Stop local dependency containers without deleting persistent volumes.
+        reset-deps:
+          command: "docker compose -f <compose_file> down -v"
+          purpose: Optional destructive reset variant for local dependency containers; include only when repository docs or tests imply volume cleanup is useful.
+      wiring_rules:
+        - "If the base start command requires local containers according to repository config or documentation, add the matching start-deps task to its deps list; apply the final affected-folder suffix to both task names when their dirs are below the repository root."
+        - If compose evidence lives under test resources, such as src/test/resources/compose, do not automatically make base start depend on it. Add a start-deps task and attach it to test-integration or another integration-test variant when such a variant exists, appending each task's affected-folder suffix when needed.
+        - If multiple compose files exist for different purposes, create qualified variants such as start-deps-redis, start-deps-mongo, start-deps-test, or start-deps-full instead of merging unrelated services, then append the affected-folder suffix for a non-root dir (for example, start-deps-redis-code).
+        - Do not invent service containers from dependencies alone. A Redis, MongoDB, Kafka, or PostgreSQL library dependency is not enough to generate Docker Compose tasks without a compose file, repository documentation, or authoritative Container Hub guidance tied to the repository's local setup.
+        - Prefer Docker Compose v2 syntax, docker compose. Use docker-compose only when repository evidence explicitly uses the legacy binary.
+        - Preserve repository-relative paths and never embed absolute local paths in compose commands.
+
+  deprecated_profile_pattern:
+    rule: Do not create separate command profiles for AMIGA versus non-AMIGA variants when the underlying toolchain commands are the same. Add or refine capability overlays instead.
+
+task_rules:
+  known_phase_task_names: The canonical phase task prefixes are install, build, lint, format, test, and start. Include a phase task only when it is applicable and supported by evidence. Append the affected folder suffix when its `dir` is below the repository root.
+  variant_naming: When multiple supported alternatives exist for the same phase, add extra tasks using the base phase name as a prefix followed by a kebab-case qualifier. Append the affected folder as the final qualifier for non-root directories, such as install-ci-code, start-with-mocks-code, start-full-docs, or test-integration-code.
+  affected_folder_suffix: "A task with `dir` other than `.` must end in the normalized kebab-case basename of that directory. A task with `dir: .` does not receive a folder suffix."
+  install_asdf_preflight: Every task named `install` or prefixed with `install-` must declare `asdf install` as its first `cmds` entry and must not declare `deps` that would run before it.
+  evidenced_workflow_coverage: Every evidenced phase and every evidenced variant must have its corresponding Taskfile task. The rule is technology-neutral and applies equally to all supported build systems.
+  frontend_start_host: Every task named `start` or prefixed with `start-` whose command directly or indirectly launches a Vite or Webpack development server must ensure the effective server command contains `--host 0.0.0.0`. Reject both missing and redundant Taskfile forwarding when the immutable underlying script already supplies the flag.
+  explicit_run_directory: Every included task must declare its execution directory explicitly with a Taskfile dir field, even when the directory is the repository root (.).
+  no_placeholder_tasks: Do not include tasks whose only purpose is to report that no supported command was identified.
+  yaml_safe_command_scalars: Every command under a cmds list must be serialized as valid YAML.
+
+constraints:
+  - name: repository_relative_paths_only
+    purpose: Use paths relative to the repository root inside the Taskfile, including every dir field and any file paths embedded in commands.
+  - name: no_absolute_runtime_paths
+    purpose: Do not include local runtime paths such as /Users/... or /home/... inside the Taskfile.
+  - name: no_user_home_paths
+    purpose: Do not include user-home paths such as ~/... inside the Taskfile.
+  - name: no_code_fences
+    purpose: The generated Taskfile artifact must be plain YAML without Markdown fences.
+  - name: parseable_yaml
+    purpose: The generated Taskfile artifact must parse successfully as YAML before it is written or accepted.

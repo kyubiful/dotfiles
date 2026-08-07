@@ -1,0 +1,123 @@
+document:
+  title_pattern: "# <repo_name> Architecture"
+  audience: Agents first, humans second.
+  voice: Canonical repository architecture reference, not an exploration report.
+  stance: Describe the repository as it is. Do not narrate how the information was discovered, generated, detected, or validated.
+  uncertainty_style: Use direct repository-oriented empty states such as "No repository-local evidence was found for <topic>" when information is missing or ambiguous.
+  artifact_context: Workspace artifact context is an optional exploration aid. Use it to focus repository inspection, not as an authoritative or complete product map.
+
+applicability_policy:
+  mission_first: Every section must be adapted to the artifact mission, artifact-owned surfaces, and repository-local sources.
+  no_forced_topics: Do not force any topic just because it appears in this generic contract. Include a topic only when it is relevant to the artifact mission or necessary for an agent to safely modify an owned surface.
+  omit_incidental_infrastructure: Do not document incidental repository infrastructure unless it materially affects artifact-owned surfaces.
+  github_operational_metadata: "`.github` content limited to CI/CD, releases, security, reviews, or GitHub governance is not functional architecture. This rule overrides materiality and lifecycle-automation exceptions. Mention it only as a relevant contribution constraint. Exception: describe it as architecture only when reusable automation or policy-as-code is the repository's primary deliverable and is consumed externally."
+  empty_state_preferred: If a required section has no applicable artifact-specific content, state that directly instead of filling it with adjacent, generic, or product-level content.
+
+quality_policy:
+  complete_correct_useful: The document must be complete, correct, and useful as a high-level repository architecture reference.
+  no_half_truths: Do not state partial truths or leave an introduced architectural aspect incomplete. When a section mentions an owned concern, relationship, responsibility, group, or set, explain the relevant members or boundaries at a consistent high level.
+  no_example_as_whole: Do not use one concrete example as if it explained the whole architectural concern. If examples are useful, keep them clearly subordinate to the broader explanation.
+  relevant_detail_not_inventory: Include details when they are architecturally relevant to understanding repository responsibilities, boundaries, or modification impact. Avoid exhaustive implementation inventories.
+
+sections:
+  - heading: Overview
+    required: true
+    purpose: Explain what this repository or artifact is responsible for and what this architecture document covers.
+    include:
+      - Artifact type or role when known
+      - Purpose
+      - Scope
+      - Primary entry points
+    empty_state: State explicitly when primary entry points or scope boundaries cannot be identified.
+
+  - heading: Stack & Environment
+    required: true
+    purpose: Capture technical context that materially affects artifact-owned surfaces, rather than every available tool or incidental workflow.
+    include:
+      - Technical context relevant to owned surfaces
+      - Build, validation, or publication systems when they govern owned surfaces
+      - AMIGA project status when it materially affects owned surfaces
+      - Tool versions when required to work on owned surfaces
+    empty_state: State explicitly when optional technical facts such as tool versions are absent.
+
+  - heading: Project Structure
+    required: true
+    purpose: Explain how the repository is organized around areas that directly implement, define, or store artifact-owned responsibilities.
+    include:
+      - Artifact-owned surfaces
+      - Repository areas that directly implement, define, or store artifact-owned responsibilities
+      - Organization of relevant assets
+      - Relationships between owned surfaces
+    exclude:
+      - Areas that only automate, validate, publish, govern, or otherwise support another owned surface, unless that lifecycle automation is itself a repository-owned responsibility
+      - Incidental infrastructure whose replacement would not change the repository's owned responsibilities or boundaries
+    empty_state: State explicitly when owned surfaces or their relationships cannot be identified.
+
+  - heading: Architecture & Patterns
+    required: true
+    purpose: Describe artifact-specific organization, boundaries, composition, governance, or implementation patterns that matter for this repository.
+    include:
+      - Artifact-specific organization model
+      - Boundaries around owned surfaces
+      - Applicable patterns that affect owned surfaces
+    empty_state: State explicitly when no repository-local source establishes a pattern or mechanism.
+
+  - heading: Contracts & Integrations
+    required: true
+    purpose: Make contracts, counterparts, and integration mechanisms easy to find when they are part of the artifact mission or affect owned surfaces.
+    include:
+      - Owned, produced, consumed, or published contracts
+      - Counterparts relevant to owned surfaces
+      - Integration mechanisms relevant to the artifact mission
+    empty_state: State "No contracts or integrations identified" when none are found.
+
+  - heading: Runtime & Data Flow
+    required: true
+    purpose: Explain execution, publication, validation, consumption, data, or lifecycle flows only when they belong to the artifact mission.
+    include:
+      - Artifact-owned flows
+      - Movement or lifecycle of owned surfaces when applicable
+      - Boundaries of applicable flows
+    empty_state: State explicitly when this repository does not own an applicable flow.
+
+  - heading: Conventions
+    required: true
+    purpose: Capture conventions that matter when modifying artifact-owned surfaces.
+    include:
+      - Applicable conventions for owned surfaces
+      - Organization, validation, or contribution expectations that materially affect owned surfaces
+    empty_state: State explicitly when a convention is not identifiable.
+
+  - heading: Constraints & Gotchas
+    required: true
+    purpose: Surface non-obvious constraints that would trip up an agent modifying artifact-owned surfaces.
+    include:
+      - Non-obvious constraints affecting owned surfaces
+      - Assets or generated outputs that must not be edited manually when applicable
+      - Dependencies or gotchas that materially affect the artifact mission
+      - First-time contributor traps for the owned surfaces
+    empty_state: State "No specific constraints or gotchas identified" when none are found.
+
+evidence_policy:
+  detection_json_is_authoritative_for_stack: Stack, build system, AMIGA status, and tool versions must come from detect-repo.py output. Use those facts without mentioning detection JSON, detector output, or exploration mechanics in generated prose.
+  contracts_are_architectural_analysis: Contract and integration facts do not come from detect-repo.py output. Infer them from repository-local architectural sources and present only high-level, relevant, well-supported conclusions.
+  uncertainty_required: When architecture information is missing or ambiguous, write the contract empty-state wording or a repository-oriented uncertainty statement instead of a plausible guess.
+  repository_evidence_language: The phrase "repository evidence" and variants are process language. Prefer concrete sources such as "in code/pom.xml", "in docs/", "in application configuration", or the uncertainty pattern "No repository-local evidence was found for <topic>".
+  workspace_context_boundaries: Use workspace artifact context to decide which local sources and relationships to inspect. Describe adjacent repositories and responsibility boundaries only when established by repository-local sources; do not present the workspace context itself as exhaustive product topology, and do not infer artifact roles or sibling relationships from naming conventions alone.
+  canonical_fact_language: Treat detection and workspace context as internal inputs. In generated prose, present facts as repository facts, not as things that were detected, reported, provided, inventoried, or output by tooling.
+
+constraints:
+  - name: repository_relative_paths_only
+    purpose: Use paths relative to the repository root in generated markdown.
+  - name: no_absolute_runtime_paths
+    purpose: Do not include local runtime paths such as /Users/... or /home/....
+  - name: no_user_home_paths
+    purpose: Do not include user-home paths such as ~/...
+  - name: complete_markdown_document
+    purpose: Produce a complete ARCHITECTURE.md document, not a partial section.
+  - name: no_cache_metadata
+    purpose: Do not include cache metadata or obsolete stack-cache concepts.
+  - name: no_generated_freshness_metadata
+    purpose: Do not include generated freshness, provenance, audit, or hash sections.
+  - name: no_exploration_process_language
+    purpose: Do not mention sub-agents, model behavior, detection JSON, detector output, repository snapshots, exploration runs, or similar generation-process details.

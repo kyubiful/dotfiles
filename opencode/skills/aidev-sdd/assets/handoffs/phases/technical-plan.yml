@@ -1,0 +1,11 @@
+schema_version: 1
+phase: technical-plan
+agent: AIDevTechPlanner
+artifacts:
+  technical-plan:
+    kind: technical-plan
+    scope: session
+    path: tech-plan.md
+allowed_flags:
+  - artifact
+  - blocker

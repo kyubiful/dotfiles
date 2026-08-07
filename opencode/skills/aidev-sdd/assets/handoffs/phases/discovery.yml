@@ -1,0 +1,11 @@
+schema_version: 1
+phase: discovery
+agent: AIDevResearcher
+artifacts:
+  research:
+    kind: research
+    scope: session
+    path: research.md
+allowed_flags:
+  - artifact
+  - blocker

@@ -1,0 +1,25 @@
+schema_version: 1
+phase: functional-spec
+agent: AIDevPlanner
+artifacts:
+  plan:
+    kind: plan
+    scope: session
+    path: plan.md
+  backlog:
+    kind: backlog
+    scope: session
+    path: backlog-plan.yml
+allowed_flags:
+  - artifact
+  - spec
+  - replace-spec
+  - contract-map
+  - remove-spec
+  - blocker
+required_command_flags:
+  - --spec primary-spec session specs/<domain>/<spec-name>/spec.md primary
+manifest_notes:
+  - Replace <domain> and <spec-name> in the required --spec flag before running the command. Add further specs with --spec as needed.
+  - When contracts.yml exists, add one or more --contract-map flags so every contract ID maps to AC IDs from a declared spec.
+  - Add optional prototypes, spec drafts, or spec-relations files with --artifact.

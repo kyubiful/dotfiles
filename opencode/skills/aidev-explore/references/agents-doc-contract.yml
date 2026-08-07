@@ -1,0 +1,21 @@
+document:
+  target_file: AGENTS.md
+
+required_paragraphs:
+  - text: "Repository architecture context lives in ARCHITECTURE.md. Always read it to acquire context and/or before making changes."
+    purpose: Ensure every agent entering the repository treats ARCHITECTURE.md as the source of architectural context before modifying code.
+
+conditional_paragraphs:
+  taskfile:
+    text: "Local development commands live in the repository-root Taskfile (`Taskfile.yml`, or `Taskfile.yaml` when already present). Always prefer `task <phase>` for standard local workflows (`install`, `build`, `lint`, `format`, `test`, `start`)."
+    required_when: A repository-root Taskfile exists.
+    forbidden_when: No repository-root Taskfile exists.
+    purpose: Ensure every agent can discover the repository-root Taskfile as the source of local development and execution commands when that file is part of the repository guidance.
+
+forbidden_literals:
+  - "<!-- aidev-explore:local-dev:start -->"
+  - "<!-- aidev-explore:local-dev:end -->"
+
+constraints:
+  - name: no_embedded_local_dev_commands
+    purpose: The skill does not store local workflow commands in AGENTS.md; when a Taskfile exists, those commands live there.

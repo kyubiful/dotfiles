@@ -1,0 +1,95 @@
+schema_version: 2
+session:
+  id: "YYYYMMDD-{slug}"
+  name: "Descriptive session name"
+  date: "YYYYMMDD"
+  created_at: "<AIDEV_NOW_UTC>"
+  updated_at: "<AIDEV_NOW_UTC>"
+status: active
+execution_mode: interactive
+track: <to-be-defined>
+track_classification:
+  decided_by: AIDevOrchestrator
+  decided_at: "<AIDEV_NOW_UTC>"
+  rationale: Default classification; replace during session initialization.
+  signals: []
+specs:
+current_phase: bootstrap
+phases:
+  bootstrap:
+    status: pending
+    completed_at: null
+    artifacts: []
+  discovery:
+    status: pending
+    completed_at: null
+    artifacts: []
+  functional-spec:
+    status: pending
+    completed_at: null
+    artifacts: []
+  spec-validation:
+    status: pending
+    completed_at: null
+    artifacts: []
+  technical-plan:
+    status: pending
+    completed_at: null
+    artifacts: []
+  test-design:
+    status: pending
+    completed_at: null
+    artifacts: []
+  implementation:
+    status: pending
+    completed_at: null
+    artifacts: []
+  spec-verification:
+    status: pending
+    completed_at: null
+    artifacts: []
+  retro:
+    status: pending
+    completed_at: null
+    artifacts: []
+gates:
+  bootstrap:
+    status: pending
+    evidence: []
+  discovery:
+    status: pending
+    evidence: []
+  functional-spec:
+    status: pending
+    evidence: []
+  spec-validation:
+    status: pending
+    evidence: []
+  technical-plan:
+    status: pending
+    evidence: []
+  test-design:
+    status: pending
+    evidence: []
+  implementation:
+    status: pending
+    evidence: []
+  spec-verification:
+    status: pending
+    evidence: []
+  retro:
+    status: pending
+    evidence: []
+orchestration:
+  workspace_preflight: null
+  pending_delegation: null
+  remediation_loop:
+    max_iterations: 3
+    iterations: 0
+    last_target: null
+metrics:
+  phases: []
+decisions:
+  - date: "<AIDEV_NOW_UTC>"
+    decision: Topic initialized with the standard SDD workflow.
+    owner: AIDevOrchestrator

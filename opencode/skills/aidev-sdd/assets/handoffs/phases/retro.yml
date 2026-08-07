@@ -1,0 +1,18 @@
+schema_version: 1
+phase: retro
+agent: AIDevRetro
+artifacts:
+  retro:
+    kind: retro
+    scope: session
+    path: retro.md
+allowed_flags:
+  - artifact
+  - spec
+  - replace-spec
+  - delete-spec
+  - blocker
+manifest_notes:
+  - For each created or updated canonical spec, use --spec with workspace scope and pair it with --replace-spec when it replaces a registered session draft.
+  - Add each changes registry and per-session change note with --artifact.
+  - For each physically removed canonical package, use --delete-spec and do not reference deleted files as artifacts.

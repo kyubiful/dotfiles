@@ -1,0 +1,11 @@
+schema_version: 1
+phase: implementation
+agent: AIDevCoder
+artifacts:
+  code:
+    kind: code-journal
+    scope: session
+    path: code.md
+allowed_flags:
+  - artifact
+  - blocker

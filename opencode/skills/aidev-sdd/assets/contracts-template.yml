@@ -1,0 +1,35 @@
+schema_version: 1
+# contracts.yml is the session-level manifest of input contracts.
+# Each entry represents one deliverable, capture, or reference artifact
+# that serves as an input to the session. There is no closed type system;
+# media_type and metadata describe the content, they do not constrain it.
+#
+# Full lifecycle, traceability rules, validation rules, and specialist
+# responsibilities are defined in contracts-guide.md. Load that guide
+# before processing or validating contracts.
+#
+# Every contract listed in this file is binding. If a contract does not
+# apply, remove its entry rather than using a status field.
+#
+# Raw contract files (images, PDFs, screenshots, design files, OpenAPI
+# specs, etc.) must be stored inside the dedicated `contracts/` subdirectory
+# within the session directory and referenced with a relative path.
+#
+# Example layout:
+#   sessions/{YYYYMMDD}-{slug}/
+#   ├── contracts.yml
+#   └── contracts/
+#       ├── screenshot-homepage.png
+#       ├── designs/
+#       │   └── wireframe-v2.fig
+#       ├── PRD-login-v2.pdf
+#       └── user-service-openapi.yaml
+#
+# Rules:
+#   - id must be unique within this file.
+#   - path is relative to this session directory and must not contain "..".
+#   - path must be inside the `contracts/` subdirectory.
+#   - sha256 is required for integrity verification.
+#   - links[] are optional paths to related specs or trace entries (relative to session).
+#   - metadata is free-form; use it for domain-specific annotations.
+contracts: []

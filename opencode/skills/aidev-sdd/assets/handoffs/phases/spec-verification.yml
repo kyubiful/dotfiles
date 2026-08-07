@@ -1,0 +1,11 @@
+schema_version: 1
+phase: spec-verification
+agent: AIDevVerifier
+artifacts:
+  verification:
+    kind: verification
+    scope: session
+    path: verification.md
+allowed_flags:
+  - artifact
+  - blocker

@@ -1,0 +1,38 @@
+schema_version: 2
+session: YYYYMMDD-{slug}
+source: .aicontext/deliverables/sdd/sessions/YYYYMMDD-{slug}
+# Each backlog item links to its spec draft via source_spec.
+# source_spec is resolved relative to this session directory, e.g. "specs/auth/login/spec.md".
+# change_kind classifies the item against the canonical baseline:
+#   new       -> create a GitHub issue
+#   modified  -> update the existing GitHub issue
+#   unchanged -> no GitHub action
+#   removed   -> no GitHub action (records that an already-standardized spec is being retired this session)
+# publish_decision records the user's choice for the item once the projection is offered:
+#   pending        -> not yet decided (offer not made or awaiting the user's answer)
+#   approved       -> user approved publishing; the item MUST be published before functional-spec
+#                     completes (github.issue_url/issue_number set, github.sync_status: synced)
+#   declined       -> user declined; the item stays unpublished (github.sync_status: not-published)
+#   not-applicable -> change_kind unchanged/removed (no GitHub action is possible)
+# Downstream technical planning and implementation consume approved synced github.issue_url
+# values as parent functional issues for per-repository technical issues.
+backlog_items:
+  - id: US-001
+    type: user-story
+    title: Example user-facing capability
+    source_spec: specs/example/example-spec/spec.md
+    change_kind: new
+    publish_decision: pending
+    roadmap:
+      priority: null
+      size: null
+      milestone: null
+      project_status: candidate
+      project_fields: {}
+    github:
+      issue_url: null
+      issue_number: null
+      project_number: null
+      project_item_id: null
+      last_synced_commit: null
+      sync_status: not-published

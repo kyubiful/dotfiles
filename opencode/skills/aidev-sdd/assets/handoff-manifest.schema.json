@@ -1,0 +1,451 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://inditex.dev/aidev/sdd/handoff-manifest.schema.json",
+  "title": "SDD specialist handoff manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "phase", "status", "artifacts"],
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "blocked" } } },
+      "then": {
+        "required": ["blocker_refs"],
+        "properties": { "blocker_refs": { "minItems": 1 } }
+      }
+    },
+    {
+      "if": { "properties": { "status": { "const": "ready" } } },
+      "then": { "properties": { "blocker_refs": { "maxItems": 0 } } }
+    },
+    {
+      "if": { "properties": { "phase": { "const": "functional-spec" } } },
+      "then": {
+        "required": ["specs"],
+        "properties": {
+          "specs": {
+            "minItems": 1,
+            "contains": {
+              "type": "object",
+              "required": ["artifact", "relation"],
+              "properties": {
+                "artifact": { "const": "primary-spec" },
+                "relation": { "const": "primary" }
+              }
+            },
+            "minContains": 1,
+            "maxContains": 1
+          },
+          "artifacts": {
+            "required": ["plan", "backlog", "primary-spec"],
+            "properties": {
+              "plan": { "properties": { "kind": { "const": "plan" } } },
+              "backlog": { "properties": { "kind": { "const": "backlog" } } },
+              "primary-spec": { "properties": { "kind": { "const": "spec" } } }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "spec_removals": { "maxItems": 0 },
+          "contract_mappings": { "maxItems": 0 }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "phase": { "const": "discovery" } } },
+      "then": {
+        "properties": {
+          "artifacts": {
+            "required": ["research"],
+            "properties": {
+              "research": { "properties": { "kind": { "const": "research" } } }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "phase": { "not": { "enum": ["functional-spec", "retro"] } }
+        }
+      },
+      "then": {
+        "properties": {
+          "specs": { "maxItems": 0 },
+          "artifacts": {
+            "additionalProperties": {
+              "not": {
+                "type": "object",
+                "required": ["kind"],
+                "properties": { "kind": { "const": "spec" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "phase": { "const": "technical-plan" } } },
+      "then": {
+        "properties": {
+          "artifacts": {
+            "required": ["technical-plan"],
+            "properties": {
+              "technical-plan": {
+                "properties": { "kind": { "const": "technical-plan" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "phase": { "const": "test-design" } } },
+      "then": {
+        "properties": {
+          "artifacts": {
+            "required": ["test-plan"],
+            "properties": {
+              "test-plan": {
+                "properties": { "kind": { "const": "test-plan" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "phase": { "const": "implementation" } } },
+      "then": {
+        "properties": {
+          "artifacts": {
+            "required": ["code"],
+            "properties": {
+              "code": { "properties": { "kind": { "const": "code-journal" } } }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "phase": { "const": "spec-verification" } } },
+      "then": {
+        "properties": {
+          "artifacts": {
+            "required": ["verification"],
+            "properties": {
+              "verification": {
+                "properties": { "kind": { "const": "verification" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "phase": { "const": "retro" } } },
+      "then": {
+        "properties": {
+          "artifacts": {
+            "required": ["retro"],
+            "properties": {
+              "retro": { "properties": { "kind": { "const": "retro" } } }
+            },
+            "additionalProperties": {
+              "if": { "properties": { "kind": { "const": "spec" } } },
+              "then": { "properties": { "scope": { "const": "workspace" } } }
+            }
+          },
+          "spec_deletions": { "type": "array" }
+        }
+      },
+      "else": { "properties": { "spec_deletions": { "maxItems": 0 } } }
+    }
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "phase": {
+      "enum": [
+        "discovery",
+        "functional-spec",
+        "technical-plan",
+        "test-design",
+        "implementation",
+        "spec-verification",
+        "retro"
+      ]
+    },
+    "status": { "enum": ["ready", "blocked"] },
+    "artifacts": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "pattern": "^[a-z][a-z0-9-]*$" },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "scope", "path"],
+        "properties": {
+          "kind": {
+            "enum": [
+              "research",
+              "plan",
+              "backlog",
+              "spec",
+              "spec-draft",
+              "spec-relations",
+              "prototype",
+              "technical-plan",
+              "test-plan",
+              "code-journal",
+              "verification",
+              "retro",
+              "changes-registry",
+              "change-note"
+            ]
+          },
+          "scope": { "enum": ["session", "workspace"] },
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+          }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "scope": { "const": "session" } } },
+            "then": {
+              "properties": { "path": { "pattern": "^(?!workspace:)" } }
+            }
+          },
+          {
+            "if": { "properties": { "scope": { "const": "workspace" } } },
+            "then": {
+              "properties": {
+                "path": { "pattern": "^\\.aicontext/deliverables/sdd/" }
+              }
+            }
+          },
+          {
+            "if": { "properties": { "kind": { "const": "research" } } },
+            "then": {
+              "properties": { "path": { "pattern": "(?:^|/)research\\.md$" } }
+            }
+          },
+          {
+            "if": { "properties": { "kind": { "const": "plan" } } },
+            "then": {
+              "properties": { "path": { "pattern": "(?:^|/)plan\\.md$" } }
+            }
+          },
+          {
+            "if": { "properties": { "kind": { "const": "backlog" } } },
+            "then": {
+              "properties": {
+                "path": { "pattern": "(?:^|/)backlog-plan\\.yml$" }
+              }
+            }
+          },
+          {
+            "if": { "properties": { "kind": { "const": "spec" } } },
+            "then": {
+              "properties": { "path": { "pattern": "(?:^|/)spec\\.md$" } }
+            }
+          },
+          {
+            "if": { "properties": { "kind": { "const": "technical-plan" } } },
+            "then": {
+              "properties": { "path": { "pattern": "(?:^|/)tech-plan\\.md$" } }
+            }
+          },
+          {
+            "if": { "properties": { "kind": { "const": "test-plan" } } },
+            "then": {
+              "properties": { "path": { "pattern": "(?:^|/)test-plan\\.md$" } }
+            }
+          },
+          {
+            "if": { "properties": { "kind": { "const": "code-journal" } } },
+            "then": {
+              "properties": { "path": { "pattern": "(?:^|/)code\\.md$" } }
+            }
+          },
+          {
+            "if": { "properties": { "kind": { "const": "verification" } } },
+            "then": {
+              "properties": {
+                "path": { "pattern": "(?:^|/)verification\\.md$" }
+              }
+            }
+          },
+          {
+            "if": { "properties": { "kind": { "const": "retro" } } },
+            "then": {
+              "properties": { "path": { "pattern": "(?:^|/)retro\\.md$" } }
+            }
+          },
+          {
+            "if": { "properties": { "kind": { "const": "changes-registry" } } },
+            "then": {
+              "properties": { "path": { "pattern": "(?:^|/)changes\\.json$" } }
+            }
+          }
+        ]
+      }
+    },
+    "specs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["artifact", "relation"],
+        "properties": {
+          "artifact": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+          "relation": { "enum": ["primary", "dependency", "reference"] },
+          "replaces": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["scope", "path"],
+            "properties": {
+              "scope": { "enum": ["session", "workspace"] },
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+              }
+            },
+            "allOf": [
+              {
+                "if": { "properties": { "scope": { "const": "session" } } },
+                "then": {
+                  "properties": { "path": { "pattern": "^(?!workspace:)" } }
+                }
+              },
+              {
+                "if": { "properties": { "scope": { "const": "workspace" } } },
+                "then": {
+                  "properties": {
+                    "path": { "pattern": "^\\.aicontext/deliverables/sdd/" }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "spec_removals": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["scope", "path"],
+        "properties": {
+          "scope": { "enum": ["session", "workspace"] },
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+          }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "scope": { "const": "session" } } },
+            "then": {
+              "properties": { "path": { "pattern": "^(?!workspace:)" } }
+            }
+          },
+          {
+            "if": { "properties": { "scope": { "const": "workspace" } } },
+            "then": {
+              "properties": {
+                "path": { "pattern": "^\\.aicontext/deliverables/sdd/" }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "spec_deletions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["registered", "package"],
+        "properties": {
+          "registered": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["scope", "path"],
+            "properties": {
+              "scope": { "enum": ["session", "workspace"] },
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).*/spec\\.md$"
+              }
+            },
+            "allOf": [
+              {
+                "if": { "properties": { "scope": { "const": "session" } } },
+                "then": {
+                  "properties": {
+                    "path": { "pattern": "^specs/[^/]+/[^/]+/spec\\.md$" }
+                  }
+                }
+              },
+              {
+                "if": { "properties": { "scope": { "const": "workspace" } } },
+                "then": {
+                  "properties": {
+                    "path": {
+                      "pattern": "^\\.aicontext/deliverables/sdd/specs/[^/]+/[^/]+/spec\\.md$"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "package": {
+            "type": "string",
+            "pattern": "^\\.aicontext/deliverables/sdd/specs/[^/]+/[^/]+$"
+          }
+        }
+      }
+    },
+    "contract_mappings": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["contract", "spec", "acs"],
+        "properties": {
+          "contract": { "type": "string", "minLength": 1 },
+          "spec": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+          "acs": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "type": "string", "pattern": "^AC-[0-9]+$" }
+          }
+        }
+      }
+    },
+    "blocker_refs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["artifact", "id"],
+        "properties": {
+          "artifact": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+          "id": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

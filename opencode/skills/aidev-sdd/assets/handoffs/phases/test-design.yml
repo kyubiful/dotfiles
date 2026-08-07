@@ -1,0 +1,11 @@
+schema_version: 1
+phase: test-design
+agent: AIDevTester
+artifacts:
+  test-plan:
+    kind: test-plan
+    scope: session
+    path: test-plan.md
+allowed_flags:
+  - artifact
+  - blocker
