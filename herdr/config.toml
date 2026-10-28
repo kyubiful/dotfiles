@@ -1,0 +1,51 @@
+onboarding = false
+
+[ui.toast]
+delivery = "herdr"
+
+[terminal]
+default_shell = "/usr/bin/zsh"
+
+[theme]
+name = "catppuccin"
+auto_switch = false
+
+[keys]
+prefix = "ctrl+t"
+
+# splits
+split_vertical = "prefix+v"      # derecha
+split_horizontal = "prefix+s"    # abajo
+
+# foco entre paneles
+focus_pane_left = "prefix+h"
+focus_pane_down = "prefix+j"
+focus_pane_up = "prefix+k"
+focus_pane_right = "prefix+l"
+
+# redimensionar (antes: shift+hjkl); swap se mueve a alt para evitar conflicto
+resize_pane_left = "prefix+shift+h"
+resize_pane_down = "prefix+shift+j"
+resize_pane_up = "prefix+shift+k"
+resize_pane_right = "prefix+shift+l"
+swap_pane_left = "prefix+alt+h"
+swap_pane_down = "prefix+alt+j"
+swap_pane_up = "prefix+alt+k"
+swap_pane_right = "prefix+alt+l"
+resize_mode = "prefix+alt+r"
+
+# tabs
+new_tab = "prefix+c"
+next_tab = "prefix+n"
+close_tab = "prefix+x"
+rename_tab = "prefix+r"
+close_pane = "prefix+shift+x"
+zoom = "prefix+z"
+
+# workspaces (los "spaces" de herdr)
+new_workspace = "prefix+w"
+close_workspace = "prefix+shift+d"
+workspace_picker = "prefix+alt+w"
+
+# sesión
+detach = "prefix+d"
